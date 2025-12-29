@@ -1,0 +1,61 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="row mt-3">
+  <div class="col-8 offset-2">
+
+    <h3>Create a new Listing</h3>
+
+    <form action="/listings" method="POST" 
+          class="needs-validation" novalidate 
+          enctype="multipart/form-data">
+
+      <div class="mb-3">
+        <label class="form-label">Title</label>
+        <input name="listing[title]" class="form-control" required>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Description</label>
+        <textarea name="listing[description]" class="form-control" required></textarea>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Upload Listing Image</label>
+        <input name="image" type="file" class="form-control">
+      </div>
+
+      <div class="row">
+        <div class="mb-3 col-md-4">
+          <label class="form-label">Price</label>
+          <input name="listing[price]" type="number" class="form-control" required>
+        </div>
+
+        <div class="mb-3 col-md-8">
+          <label class="form-label">Country</label>
+          <input name="listing[country]" class="form-control" required>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Location</label>
+        <input name="listing[location]" class="form-control" required>
+      </div>
+
+      <!-- 🔥 FIXED -->
+      <div class="row">
+        <div class="mb-3 col-md-6">
+          <label class="form-label">Latitude</label>
+          <input name="listing[latitude]" type="number" step="any" class="form-control" required>
+        </div>
+
+        <div class="mb-3 col-md-6">
+          <label class="form-label">Longitude</label>
+          <input name="listing[longitude]" type="number" step="any" class="form-control" required>
+        </div>
+      </div>
+
+      <button class="btn btn-dark">Add Listing</button>
+
+    </form>
+  </div>
+</div>
