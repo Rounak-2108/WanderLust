@@ -15,6 +15,9 @@ const passport = require("passport");
 const LocalStrategy = require("passport-local");
 const User = require("./models/user");
 
+// ✅ REQUIRED FOR RENDER
+app.set("trust proxy", 1);
+
 // ROUTES
 const listingRouter = require("./routes/listing");
 const reviewRouter = require("./routes/review");
@@ -28,9 +31,7 @@ console.log("🔍 DB URL loaded:", dbUrl ? "YES" : "NO");
 
 async function connectDB() {
   try {
-    await mongoose.connect(dbUrl, {
-      serverSelectionTimeoutMS: 5000,
-    });
+    await mongoose.connect(dbUrl);
     console.log("✅ MongoDB Connected");
   } catch (err) {
     console.error("❌ MongoDB Connection Failed:", err.message);
@@ -44,20 +45,22 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json()); // ✅ important
 app.use(methodOverride("_method"));
 app.use(express.static(path.join(__dirname, "public")));
 
 // ================= SESSION =================
 app.use(
   session({
+    name: "wanderlust-session",
     secret: process.env.SESSION_SECRET || "mysupersecretcode",
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
     cookie: {
-      expires: Date.now() + 7 * 24 * 60 * 60 * 1000,
-      maxAge: 7 * 24 * 60 * 60 * 1000,
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 1000 * 60 * 60 * 24 * 7,
     },
   })
 );
@@ -81,12 +84,12 @@ app.use((req, res, next) => {
 });
 
 // ================= ROUTES =================
+app.use("/", userRouter);
 app.use("/listings", listingRouter);
 app.use("/listings/:id/reviews", reviewRouter);
-app.use("/", userRouter);
 
 // ================= 404 =================
-app.use((req, res, next) => {
+app.all("*", (req, res, next) => {
   next(new ExpressError("Page Not Found", 404));
 });
 
@@ -97,7 +100,7 @@ app.use((err, req, res, next) => {
 });
 
 // ================= START SERVER =================
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 10000;
 
 connectDB().then(() => {
   app.listen(PORT, () => {
