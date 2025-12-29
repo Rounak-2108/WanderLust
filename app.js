@@ -15,9 +15,6 @@ const passport = require("passport");
 const LocalStrategy = require("passport-local");
 const User = require("./models/user");
 
-// ✅ REQUIRED FOR RENDER
-app.set("trust proxy", 1);
-
 // ROUTES
 const listingRouter = require("./routes/listing");
 const reviewRouter = require("./routes/review");
@@ -25,18 +22,11 @@ const userRouter = require("./routes/user");
 
 // ================= MONGODB =================
 mongoose.set("strictQuery", true);
-
 const dbUrl = process.env.ATLASDB_URL;
-console.log("🔍 DB URL loaded:", dbUrl ? "YES" : "NO");
 
 async function connectDB() {
-  try {
-    await mongoose.connect(dbUrl);
-    console.log("✅ MongoDB Connected");
-  } catch (err) {
-    console.error("❌ MongoDB Connection Failed:", err.message);
-    process.exit(1);
-  }
+  await mongoose.connect(dbUrl);
+  console.log("✅ MongoDB Connected");
 }
 
 // ================= APP CONFIG =================
@@ -45,23 +35,15 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
 app.use(express.urlencoded({ extended: true }));
-app.use(express.json()); // ✅ important
 app.use(methodOverride("_method"));
 app.use(express.static(path.join(__dirname, "public")));
 
 // ================= SESSION =================
 app.use(
   session({
-    name: "wanderlust-session",
-    secret: process.env.SESSION_SECRET || "mysupersecretcode",
+    secret: process.env.SESSION_SECRET || "secret",
     resave: false,
     saveUninitialized: false,
-    cookie: {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 1000 * 60 * 60 * 24 * 7,
-    },
   })
 );
 
@@ -70,7 +52,6 @@ app.use(flash());
 // ================= PASSPORT =================
 app.use(passport.initialize());
 app.use(passport.session());
-
 passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
@@ -83,13 +64,18 @@ app.use((req, res, next) => {
   next();
 });
 
+// ================= ROOT ROUTE (🔥 IMPORTANT) =================
+app.get("/", (req, res) => {
+  res.redirect("/listings");
+});
+
 // ================= ROUTES =================
-app.use("/", userRouter);
 app.use("/listings", listingRouter);
 app.use("/listings/:id/reviews", reviewRouter);
+app.use("/", userRouter);
 
 // ================= 404 =================
-app.all("*", (req, res, next) => {
+app.use((req, res, next) => {
   next(new ExpressError("Page Not Found", 404));
 });
 
