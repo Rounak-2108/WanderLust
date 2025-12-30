@@ -26,7 +26,7 @@ const dbUrl = process.env.ATLASDB_URL;
 
 async function connectDB() {
   await mongoose.connect(dbUrl);
-  console.log("✅ MongoDB Connected");
+  console.log("â MongoDB Connected");
 }
 
 // ================= APP CONFIG =================
@@ -64,7 +64,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// ================= ROOT ROUTE (🔥 IMPORTANT) =================
+// ð¥ ROOT ROUTE (IMPORTANT)
 app.get("/", (req, res) => {
   res.redirect("/listings");
 });
